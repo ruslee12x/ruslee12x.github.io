@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>Focused To-Do</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.global.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .popup-enter-active, .popup-leave-active {
+      transition: opacity 0.3s ease;
+    }
+    .popup-enter-from, .popup-leave-to {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body class="flex items-start justify-center p-6 relative">
+  <div id="app" class="flex w-full max-w-7xl gap-8">
+
+    <!-- กล่องหลัก -->
+    <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md mx-auto
+                flex flex-col items-center text-gray-800
+                hover:shadow-3xl transition-shadow duration-500">
+
+      <h1 class="text-4xl font-extrabold mb-6 tracking-wide text-purple-700 drop-shadow-md">
+        โฟกัส To-Do
+      </h1>
+
+      <!-- แสดงรายการปัจจุบัน -->
+      <div v-if="currentTask" class="mb-8 w-full">
+        <p class="text-2xl text-center font-semibold mb-4 select-text">
+          {{ currentTask }}
+        </p>
+        <button 
+          @click="completeTask"
+          class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg
+                 hover:bg-purple-700 active:scale-95 transition transform duration-200"
+          aria-label="เสร็จแล้ว">
+          ✓ เสร็จแล้ว
+        </button>
+      </div>
+      <div v-else class="text-center text-gray-400 italic mb-8 select-none">
+        ไม่มีงานค้าง
+      </div>
+
+      <!-- เพิ่มงานใหม่ -->
+      <div class="w-full">
+        <textarea
+          v-model="newTask"
+          placeholder="พิมพ์งานใหม่ หรือ วางรายการหลายบรรทัด..."
+          rows="4"
+          class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-300
+                 transition duration-300 shadow-inner mb-4 resize-y"
+          @keyup.enter.ctrl.prevent="addTask"
+          aria-label="เพิ่มงานใหม่หลายรายการ"
+        ></textarea>
+        <p class="text-sm text-gray-500 mb-2">กด Ctrl+Enter เพื่อเพิ่มงานหลายรายการ</p>
+        <button
+          @click="addTask"
+          class="w-full bg-purple-500 text-white font-semibold py-3 rounded-xl shadow-md
+                 hover:bg-purple-600 active:scale-95 transition transform duration-200"
+          aria-label="เพิ่มงาน"
+        >
+          เพิ่มงาน
+        </button>
+      </div>
+
+      <!-- ปุ่มดูรายการที่ยังไม่เสร็จ -->
+      <div class="mt-6">
+        <button
+          @click="showPending = true"
+          class="text-purple-700 underline font-semibold hover:text-purple-900 transition duration-300"
+          aria-label="ดูรายการที่ยังไม่เสร็จ"
+        >
+          ดูรายการที่ยังไม่เสร็จ
+        </button>
+      </div>
+    </div>
+
+    <!-- กล่องด้านขวา: แสดงรายการที่เสร็จแล้ว -->
+    <div
+      class="bg-white rounded-3xl shadow-2xl p-6 w-72 h-[90vh] sticky top-6 overflow-y-auto
+             flex flex-col"
+      aria-label="รายการที่เสร็จแล้ว"
+    >
+      <h2 class="text-2xl font-bold mb-5 text-purple-700 select-none drop-shadow-sm">
+        ✅ เสร็จแล้ว
+      </h2>
+      <ul class="space-y-3 flex-grow">
+        <li
+          v-for="(task, index) in completedTasks"
+          :key="index"
+          class="flex justify-between items-center px-4 py-3 rounded-lg bg-purple-50 shadow-md
+                 hover:bg-purple-100 transition cursor-default select-text"
+          role="listitem"
+        >
+          <span class="line-through text-gray-500 font-medium truncate">
+            {{ task.text }}
+          </span>
+          <div class="space-x-1 flex-shrink-0">
+            <button
+              @click="moveUpCompleted(index)"
+              :disabled="index === 0"
+              class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="เลื่อนขึ้น"
+            >
+              ▲
+            </button>
+            <button
+              @click="moveDownCompleted(index)"
+              :disabled="index === completedTasks.length - 1"
+              class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="เลื่อนลง"
+            >
+              ▼
+            </button>
+            <button
+              @click="deleteTask(task)"
+              class="text-xs px-2 py-1 bg-red-400 rounded hover:bg-red-500 text-white"
+              aria-label="ลบรายการ"
+            >
+              🗑️
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Popup: รายการที่ยังไม่เสร็จ -->
+    <transition name="popup" appear>
+      <div
+        v-if="showPending"
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pending-tasks-title"
+      >
+        <div
+          class="bg-white rounded-3xl shadow-2xl p-8 w-96 max-h-[80vh] overflow-y-auto
+                 relative flex flex-col"
+        >
+          <h2
+            id="pending-tasks-title"
+            class="text-2xl font-bold mb-6 text-purple-700 select-none"
+          >
+            🕒 รายการที่ยังไม่เสร็จ
+          </h2>
+          <ul class="space-y-3 flex-grow">
+            <li
+              v-for="(task, index) in pendingTasks"
+              :key="index"
+              class="flex justify-between items-center px-4 py-3 rounded-lg bg-purple-50 shadow-md
+                     hover:bg-purple-100 transition cursor-default select-text"
+              role="listitem"
+            >
+              <span class="font-medium truncate">{{ task.text }}</span>
+              <div class="space-x-1 flex-shrink-0">
+                <button
+                  @click="moveUpPending(index)"
+                  :disabled="index === 0"
+                  class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="เลื่อนขึ้น"
+                >
+                  ▲
+                </button>
+                <button
+                  @click="moveDownPending(index)"
+                  :disabled="index === pendingTasks.length - 1"
+                  class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="เลื่อนลง"
+                >
+                  ▼
+                </button>
+                <button
+                  @click="deleteTask(task)"
+                  class="text-xs px-2 py-1 bg-red-400 rounded hover:bg-red-500 text-white"
+                  aria-label="ลบรายการ"
+                >
+                  🗑️
+                </button>
+              </div>
+            </li>
+          </ul>
+          <button
+            @click="showPending = false"
+            class="mt-6 bg-purple-300 hover:bg-purple-400 text-purple-900 font-semibold py-3 rounded-xl shadow-md
+                   transition transform active:scale-95"
+            aria-label="ปิดรายการที่ยังไม่เสร็จ"
+          >
+            ปิด
+          </button>
+        </div>
+      </div>
+    </transition>
+
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+   createApp({
+  data() {
+    return {
+      tasks: [],
+      newTask: "",
+      showPending: false
+    };
+  },
+  computed: {
+    currentTask() {
+      const task = this.tasks.find((t) => !t.done);
+      return task ? task.text : null;
+    },
+    pendingTasks() {
+      return this.tasks.filter((t) => !t.done);
+    },
+    completedTasks() {
+      return this.tasks.filter((t) => t.done).slice().reverse();
+    }
+  },
+  methods: {
+    addTask() {
+      if (this.newTask.trim() === "") return;
+
+      const lines = this.newTask
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line !== "");
+
+      lines.forEach(line => {
+        this.tasks.push({ text: line, done: false });
+      });
+
+      this.newTask = "";
+      this.saveTasks();
+    },
+    completeTask() {
+      const index = this.tasks.findIndex((t) => !t.done);
+      if (index !== -1) {
+        this.tasks[index].done = true;
+        const [doneTask] = this.tasks.splice(index, 1);
+        this.tasks.push(doneTask);
+        this.saveTasks();
+      }
+    },
+    moveUpCompleted(index) {
+      const completed = this.completedTasks;
+      if (index > 0) {
+        const globalIndex1 = this.tasks.indexOf(completed[index]);
+        const globalIndex2 = this.tasks.indexOf(completed[index - 1]);
+        [this.tasks[globalIndex1], this.tasks[globalIndex2]] = [
+          this.tasks[globalIndex2],
+          this.tasks[globalIndex1]
+        ];
+        this.saveTasks();
+      }
+    },
+    moveDownCompleted(index) {
+      const completed = this.completedTasks;
+      if (index < completed.length - 1) {
+        const globalIndex1 = this.tasks.indexOf(completed[index]);
+        const globalIndex2 = this.tasks.indexOf(completed[index + 1]);
+        [this.tasks[globalIndex1], this.tasks[globalIndex2]] = [
+          this.tasks[globalIndex2],
+          this.tasks[globalIndex1]
+        ];
+        this.saveTasks();
+      }
+    },
+    moveUpPending(index) {
+      const pending = this.pendingTasks;
+      if (index > 0) {
+        const globalIndex1 = this.tasks.indexOf(pending[index]);
+        const globalIndex2 = this.tasks.indexOf(pending[index - 1]);
+        [this.tasks[globalIndex1], this.tasks[globalIndex2]] = [
+          this.tasks[globalIndex2],
+          this.tasks[globalIndex1]
+        ];
+        this.saveTasks();
+      }
+    },
+    moveDownPending(index) {
+      const pending = this.pendingTasks;
+      if (index < pending.length - 1) {
+        const globalIndex1 = this.tasks.indexOf(pending[index]);
+        const globalIndex2 = this.tasks.indexOf(pending[index + 1]);
+        [this.tasks[globalIndex1], this.tasks[globalIndex2]] = [
+          this.tasks[globalIndex2],
+          this.tasks[globalIndex1]
+        ];
+        this.saveTasks();
+      }
+    },
+    deleteTask(task) {
+      const index = this.tasks.indexOf(task);
+      if (index !== -1) {
+        this.tasks.splice(index, 1);
+        this.saveTasks();
+      }
+    },
+    saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    },
+    loadTasks() {
+      const saved = localStorage.getItem('tasks');
+      if (saved) {
+        this.tasks = JSON.parse(saved);
+      }
+    }
+  },
+  mounted() {
+    this.loadTasks();
+  }
+}).mount("#app");
+
+  </script>
+</body>
+</html>

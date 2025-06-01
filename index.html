@@ -24,17 +24,11 @@
 </head>
 <body class="flex items-start justify-center p-6 relative">
 
-  <!-- ✅ เสียงเมื่อกดเสร็จ -->
-  <audio id="complete-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_458adfba85.mp3?filename=success-1-6297.mp3" preload="auto"></audio>
-
-  <!-- เสียงเพิ่มงาน -->
-  <audio id="add-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5ef1f46ca0.mp3?filename=click-2-6296.mp3" preload="auto"></audio>
-
-  <!-- เสียงลบงาน -->
-  <audio id="delete-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_54d4e37925.mp3?filename=trash-13786.mp3" preload="auto"></audio>
-
-  <!-- เสียงย้ายงาน -->
-  <audio id="move-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5d5e2d3267.mp3?filename=button-16-6298.mp3" preload="auto"></audio>
+  <!-- เสียงใหม่ -->
+  <audio id="complete-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="add-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+  <audio id="delete-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_box_flicks.ogg" preload="auto"></audio>
+  <audio id="move-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <div id="app" class="flex w-full max-w-7xl gap-8">
 
@@ -102,7 +96,21 @@
       <h2 class="text-2xl font-bold mb-5 text-purple-700 select-none drop-shadow-sm">✅ เสร็จแล้ว</h2>
       <ul class="space-y-3 flex-grow">
         <li v-for="(task, index) in completedTasks" :key="index" class="flex justify-between items-center px-4 py-3 rounded-lg bg-purple-50 shadow-md hover:bg-purple-100 transition cursor-default select-text">
-          <span class="line-through text-gray-500 font-medium truncate">{{ task.text }}</span>
+          <div class="flex-grow" @dblclick="startEdit(task)">
+            <template v-if="editingTask === task">
+              <input
+                v-model="editingText"
+                @keyup.enter="saveEdit"
+                @blur="saveEdit"
+                @keyup.esc="cancelEdit"
+                class="w-full p-1 rounded border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                autofocus
+              />
+            </template>
+            <template v-else>
+              <span class="line-through text-gray-500 font-medium truncate">{{ task.text }}</span>
+            </template>
+          </div>
           <div class="space-x-1 flex-shrink-0">
             <button @click="moveUpCompleted(index)" :disabled="index === 0" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▲</button>
             <button @click="moveDownCompleted(index)" :disabled="index === completedTasks.length - 1" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▼</button>
@@ -119,7 +127,21 @@
           <h2 class="text-2xl font-bold mb-6 text-purple-700">🕒 รายการที่ยังไม่เสร็จ</h2>
           <ul class="space-y-3 flex-grow">
             <li v-for="(task, index) in pendingTasks" :key="index" class="flex justify-between items-center px-4 py-3 rounded-lg bg-purple-50 shadow-md hover:bg-purple-100 transition cursor-default">
-              <span class="font-medium truncate">{{ task.text }}</span>
+              <div class="flex-grow" @dblclick="startEdit(task)">
+                <template v-if="editingTask === task">
+                  <input
+                    v-model="editingText"
+                    @keyup.enter="saveEdit"
+                    @blur="saveEdit"
+                    @keyup.esc="cancelEdit"
+                    class="w-full p-1 rounded border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    autofocus
+                  />
+                </template>
+                <template v-else>
+                  <span class="font-medium truncate select-text">{{ task.text }}</span>
+                </template>
+              </div>
               <div class="space-x-1 flex-shrink-0">
                 <button @click="moveUpPending(index)" :disabled="index === 0" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▲</button>
                 <button @click="moveDownPending(index)" :disabled="index === pendingTasks.length - 1" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▼</button>
@@ -133,7 +155,7 @@
     </transition>
   </div>
 
-  <!-- ✅ Vue App -->
+  <!-- Vue App -->
   <script>
     const { createApp } = Vue;
 
@@ -142,7 +164,9 @@
         return {
           tasks: [],
           newTask: "",
-          showPending: false
+          showPending: false,
+          editingTask: null,
+          editingText: "",
         };
       },
       computed: {
@@ -167,7 +191,10 @@
 
           // เล่นเสียงเพิ่มงาน
           const audio = document.getElementById("add-sound");
-          if (audio) audio.play();
+          if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+          }
         },
         completeTask() {
           const index = this.tasks.findIndex((t) => !t.done);
@@ -176,8 +203,12 @@
             const [doneTask] = this.tasks.splice(index, 1);
             this.tasks.push(doneTask);
             this.saveTasks();
+
             const audio = document.getElementById("complete-sound");
-            if (audio) audio.play();
+            if (audio) {
+              audio.currentTime = 0;
+              audio.play();
+            }
           }
         },
         moveUpCompleted(index) {
@@ -188,9 +219,11 @@
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
 
-            // เล่นเสียงย้ายงาน
             const audio = document.getElementById("move-sound");
-            if (audio) audio.play();
+            if (audio) {
+              audio.currentTime = 0;
+              audio.play();
+            }
           }
         },
         moveDownCompleted(index) {
@@ -201,9 +234,11 @@
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
 
-            // เล่นเสียงย้ายงาน
             const audio = document.getElementById("move-sound");
-            if (audio) audio.play();
+            if (audio) {
+              audio.currentTime = 0;
+              audio.play();
+            }
           }
         },
         moveUpPending(index) {
@@ -214,9 +249,11 @@
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
 
-            // เล่นเสียงย้ายงาน
             const audio = document.getElementById("move-sound");
-            if (audio) audio.play();
+            if (audio) {
+              audio.currentTime = 0;
+              audio.play();
+            }
           }
         },
         moveDownPending(index) {
@@ -227,38 +264,60 @@
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
 
-            // เล่นเสียงย้ายงาน
             const audio = document.getElementById("move-sound");
-            if (audio) audio.play();
+            if (audio) {
+              audio.currentTime = 0;
+              audio.play();
+            }
           }
         },
         deleteTask(task) {
-          const i = this.tasks.indexOf(task);
-          if (i !== -1) {
-            this.tasks.splice(i, 1);
+          const index = this.tasks.indexOf(task);
+          if (index !== -1) {
+            this.tasks.splice(index, 1);
             this.saveTasks();
 
-            // เล่นเสียงลบงาน
             const audio = document.getElementById("delete-sound");
-            if (audio) audio.play();
+            if (audio) {
+              audio.currentTime = 0;
+              audio.play();
+            }
           }
+          if (this.editingTask === task) this.cancelEdit();
         },
         clearAllTasks() {
-          if (confirm("คุณแน่ใจว่าต้องการลบรายการทั้งหมด?")) {
+          if (confirm("แน่ใจหรือไม่ว่าจะลบรายการทั้งหมด?")) {
             this.tasks = [];
             this.saveTasks();
-
-            // เล่นเสียงลบงาน (เหมือนลบหมด)
-            const audio = document.getElementById("delete-sound");
-            if (audio) audio.play();
           }
         },
         saveTasks() {
-          localStorage.setItem('tasks', JSON.stringify(this.tasks));
+          localStorage.setItem("tasks", JSON.stringify(this.tasks));
         },
         loadTasks() {
-          const saved = localStorage.getItem('tasks');
-          if (saved) this.tasks = JSON.parse(saved);
+          const data = localStorage.getItem("tasks");
+          if (data) {
+            this.tasks = JSON.parse(data);
+          }
+        },
+        startEdit(task) {
+          this.editingTask = task;
+          this.editingText = task.text;
+          this.$nextTick(() => {
+            // autofocus input handled in template
+          });
+        },
+        saveEdit() {
+          if (this.editingTask && this.editingText.trim() !== "") {
+            this.editingTask.text = this.editingText.trim();
+            this.saveTasks();
+          }
+          this.editingTask = null;
+          this.editingText = "";
+        },
+        cancelEdit() {
+          this.editingTask = null;
+          this.editingText = "";
         }
       },
       mounted() {
@@ -266,5 +325,6 @@
       }
     }).mount("#app");
   </script>
+
 </body>
 </html>

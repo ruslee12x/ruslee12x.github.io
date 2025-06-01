@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Focused To-Do</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/32/1828/1828640.png" type="image/png" />
+
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.global.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -24,6 +26,15 @@
 
   <!-- ✅ เสียงเมื่อกดเสร็จ -->
   <audio id="complete-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_458adfba85.mp3?filename=success-1-6297.mp3" preload="auto"></audio>
+
+  <!-- เสียงเพิ่มงาน -->
+  <audio id="add-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5ef1f46ca0.mp3?filename=click-2-6296.mp3" preload="auto"></audio>
+
+  <!-- เสียงลบงาน -->
+  <audio id="delete-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_54d4e37925.mp3?filename=trash-13786.mp3" preload="auto"></audio>
+
+  <!-- เสียงย้ายงาน -->
+  <audio id="move-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5d5e2d3267.mp3?filename=button-16-6298.mp3" preload="auto"></audio>
 
   <div id="app" class="flex w-full max-w-7xl gap-8">
 
@@ -153,6 +164,10 @@
           lines.forEach(line => this.tasks.push({ text: line, done: false }));
           this.newTask = "";
           this.saveTasks();
+
+          // เล่นเสียงเพิ่มงาน
+          const audio = document.getElementById("add-sound");
+          if (audio) audio.play();
         },
         completeTask() {
           const index = this.tasks.findIndex((t) => !t.done);
@@ -172,6 +187,10 @@
             const b = this.tasks.indexOf(completed[index - 1]);
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
+
+            // เล่นเสียงย้ายงาน
+            const audio = document.getElementById("move-sound");
+            if (audio) audio.play();
           }
         },
         moveDownCompleted(index) {
@@ -181,6 +200,10 @@
             const b = this.tasks.indexOf(completed[index + 1]);
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
+
+            // เล่นเสียงย้ายงาน
+            const audio = document.getElementById("move-sound");
+            if (audio) audio.play();
           }
         },
         moveUpPending(index) {
@@ -190,6 +213,10 @@
             const b = this.tasks.indexOf(pending[index - 1]);
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
+
+            // เล่นเสียงย้ายงาน
+            const audio = document.getElementById("move-sound");
+            if (audio) audio.play();
           }
         },
         moveDownPending(index) {
@@ -199,6 +226,10 @@
             const b = this.tasks.indexOf(pending[index + 1]);
             [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
             this.saveTasks();
+
+            // เล่นเสียงย้ายงาน
+            const audio = document.getElementById("move-sound");
+            if (audio) audio.play();
           }
         },
         deleteTask(task) {
@@ -206,12 +237,20 @@
           if (i !== -1) {
             this.tasks.splice(i, 1);
             this.saveTasks();
+
+            // เล่นเสียงลบงาน
+            const audio = document.getElementById("delete-sound");
+            if (audio) audio.play();
           }
         },
         clearAllTasks() {
           if (confirm("คุณแน่ใจว่าต้องการลบรายการทั้งหมด?")) {
             this.tasks = [];
             this.saveTasks();
+
+            // เล่นเสียงลบงาน (เหมือนลบหมด)
+            const audio = document.getElementById("delete-sound");
+            if (audio) audio.play();
           }
         },
         saveTasks() {

@@ -1,330 +1,101 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>Focused To-Do</title>
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/32/1828/1828640.png" type="image/png" />
-
-  <script src="https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.global.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องฟังใจ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
     body {
       font-family: 'Kanit', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+      background-color: #fef9f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
     }
-    .popup-enter-active, .popup-leave-active {
-      transition: opacity 0.3s ease;
+    header {
+      background-color: #ffdde1;
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 3px solid #f8c9d4;
     }
-    .popup-enter-from, .popup-leave-to {
-      opacity: 0;
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: #994d66;
+    }
+    .section {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    .section h2 {
+      color: #b76e79;
+    }
+    .card {
+      background: #fffaf8;
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+    .button {
+      background-color: #f59ca9;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .button:hover {
+      background-color: #e98090;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #fdf1f5;
+      font-size: 0.9rem;
+      color: #888;
+    }
+    img.qr {
+      width: 200px;
+      display: block;
+      margin: 1rem auto;
     }
   </style>
 </head>
-<body class="flex items-start justify-center p-6 relative">
+<body>
+  <header>
+    <h1>ห้องฟังใจ</h1>
+    <p>พื้นที่อบอุ่นสำหรับคนที่อยากถูกฟังอย่างแท้จริง</p>
+  </header>
 
-  <!-- เสียงใหม่ -->
-  <audio id="complete-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
-  <audio id="add-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
-  <audio id="delete-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_box_flicks.ogg" preload="auto"></audio>
-  <audio id="move-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
-
-  <div id="app" class="flex w-full max-w-7xl gap-8">
-
-    <!-- กล่องหลัก -->
-    <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md mx-auto flex flex-col items-center text-gray-800 hover:shadow-3xl transition-shadow duration-500">
-
-      <h1 class="text-4xl font-extrabold mb-6 tracking-wide text-purple-700 drop-shadow-md">
-        โฟกัส To-Do
-      </h1>
-
-      <!-- งานปัจจุบัน -->
-      <div v-if="currentTask" class="mb-8 w-full">
-        <p class="text-2xl text-center font-semibold mb-4 select-text">
-          {{ currentTask }}
-        </p>
-        <button 
-          @click="completeTask"
-          class="w-full bg-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg hover:bg-purple-700 active:scale-95 transition transform duration-200"
-          aria-label="เสร็จแล้ว">
-          ✓ เสร็จแล้ว
-        </button>
-      </div>
-      <div v-else class="text-center text-gray-400 italic mb-8 select-none">
-        ไม่มีงานค้าง
-      </div>
-
-      <!-- เพิ่มงาน -->
-      <div class="w-full">
-        <textarea
-          v-model="newTask"
-          placeholder="พิมพ์งานใหม่ หรือ วางรายการหลายบรรทัด..."
-          rows="4"
-          class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-300 transition duration-300 shadow-inner mb-4 resize-y"
-          @keyup.enter.ctrl.prevent="addTask"
-          aria-label="เพิ่มงานใหม่หลายรายการ"
-        ></textarea>
-        <p class="text-sm text-gray-500 mb-2">กด Ctrl+Enter เพื่อเพิ่มงานหลายรายการ</p>
-        <button
-          @click="addTask"
-          class="w-full bg-purple-500 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-purple-600 active:scale-95 transition transform duration-200"
-          aria-label="เพิ่มงาน">
-          เพิ่มงาน
-        </button>
-      </div>
-
-      <!-- ดูรายการที่ยังไม่เสร็จ + ลบทั้งหมด -->
-      <div class="mt-6 flex flex-col items-center space-y-2">
-        <button
-          @click="showPending = true"
-          class="text-purple-700 underline font-semibold hover:text-purple-900 transition duration-300"
-          aria-label="ดูรายการที่ยังไม่เสร็จ">
-          ดูรายการที่ยังไม่เสร็จ
-        </button>
-        <button
-          @click="clearAllTasks"
-          class="text-red-600 underline font-semibold hover:text-red-800 transition duration-300"
-          aria-label="ลบทั้งหมด">
-          🗑️ ลบรายการทั้งหมด
-        </button>
-      </div>
+  <div class="section">
+    <div class="card">
+      <h2>📌 เกี่ยวกับบริการ</h2>
+      <p>ถ้าคุณรู้สึกสับสน เหนื่อยใจ หรืออยากระบายโดยไม่ถูกตัดสิน ฉันจะฟังคุณด้วยความเข้าใจ โดยไม่มีคำแนะนำหรือการวินิจฉัยใด ๆ</p>
+      <p><strong>ค่าบริการทดลอง:</strong> 20 บาท / 15 นาที (หรือชำระตามใจคุณ)</p>
     </div>
 
-    <!-- กล่องแสดงงานที่เสร็จแล้ว -->
-    <div class="bg-white rounded-3xl shadow-2xl p-6 w-72 h-[90vh] sticky top-6 overflow-y-auto flex flex-col" aria-label="รายการที่เสร็จแล้ว">
-      <h2 class="text-2xl font-bold mb-5 text-purple-700 select-none drop-shadow-sm">✅ เสร็จแล้ว</h2>
-      <ul class="space-y-3 flex-grow">
-        <li v-for="(task, index) in completedTasks" :key="index" class="flex justify-between items-center px-4 py-3 rounded-lg bg-purple-50 shadow-md hover:bg-purple-100 transition cursor-default select-text">
-          <div class="flex-grow" @dblclick="startEdit(task)">
-            <template v-if="editingTask === task">
-              <input
-                v-model="editingText"
-                @keyup.enter="saveEdit"
-                @blur="saveEdit"
-                @keyup.esc="cancelEdit"
-                class="w-full p-1 rounded border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                autofocus
-              />
-            </template>
-            <template v-else>
-              <span class="line-through text-gray-500 font-medium truncate">{{ task.text }}</span>
-            </template>
-          </div>
-          <div class="space-x-1 flex-shrink-0">
-            <button @click="moveUpCompleted(index)" :disabled="index === 0" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▲</button>
-            <button @click="moveDownCompleted(index)" :disabled="index === completedTasks.length - 1" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▼</button>
-            <button @click="deleteTask(task)" class="text-xs px-2 py-1 bg-red-400 rounded hover:bg-red-500 text-white">🗑️</button>
-          </div>
-        </li>
-      </ul>
+    <div class="card">
+      <h2>💬 ติดต่อฉัน</h2>
+      <p>คุณสามารถทักแชทมาได้ที่:</p>
+      <a href="https://line.me/ti/p/~0966692370" class="button" target="_blank">แชททาง LINE</a>
+      <p>หรือ Instagram: <strong>@4w5_infj</strong></p>
     </div>
 
-    <!-- Popup รายการยังไม่เสร็จ -->
-    <transition name="popup" appear>
-      <div v-if="showPending" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 w-96 max-h-[80vh] overflow-y-auto relative flex flex-col">
-          <h2 class="text-2xl font-bold mb-6 text-purple-700">🕒 รายการที่ยังไม่เสร็จ</h2>
-          <ul class="space-y-3 flex-grow">
-            <li v-for="(task, index) in pendingTasks" :key="index" class="flex justify-between items-center px-4 py-3 rounded-lg bg-purple-50 shadow-md hover:bg-purple-100 transition cursor-default">
-              <div class="flex-grow" @dblclick="startEdit(task)">
-                <template v-if="editingTask === task">
-                  <input
-                    v-model="editingText"
-                    @keyup.enter="saveEdit"
-                    @blur="saveEdit"
-                    @keyup.esc="cancelEdit"
-                    class="w-full p-1 rounded border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                    autofocus
-                  />
-                </template>
-                <template v-else>
-                  <span class="font-medium truncate select-text">{{ task.text }}</span>
-                </template>
-              </div>
-              <div class="space-x-1 flex-shrink-0">
-                <button @click="moveUpPending(index)" :disabled="index === 0" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▲</button>
-                <button @click="moveDownPending(index)" :disabled="index === pendingTasks.length - 1" class="text-xs px-2 py-1 bg-purple-200 rounded hover:bg-purple-300 disabled:opacity-40">▼</button>
-                <button @click="deleteTask(task)" class="text-xs px-2 py-1 bg-red-400 rounded hover:bg-red-500 text-white">🗑️</button>
-              </div>
-            </li>
-          </ul>
-          <button @click="showPending = false" class="mt-6 bg-purple-300 hover:bg-purple-400 text-purple-900 font-semibold py-3 rounded-xl shadow-md active:scale-95">ปิด</button>
-        </div>
-      </div>
-    </transition>
+    <div class="card">
+      <h2>☕ สนับสนุนฉัน</h2>
+      <p>ถ้าคุณรู้สึกว่าการฟังครั้งนี้มีคุณค่า และอยากสนับสนุนค่ากาแฟให้ฉัน :)</p>
+      <img src="promptpay-qr.png" alt="PromptPay QR Code" class="qr">
+      <p><strong>ชื่อบัญชี:</strong> รุสลี ดอเลาะ</p>
+    </div>
   </div>
 
-  <!-- Vue App -->
-  <script>
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          tasks: [],
-          newTask: "",
-          showPending: false,
-          editingTask: null,
-          editingText: "",
-        };
-      },
-      computed: {
-        currentTask() {
-          const task = this.tasks.find((t) => !t.done);
-          return task ? task.text : null;
-        },
-        pendingTasks() {
-          return this.tasks.filter((t) => !t.done);
-        },
-        completedTasks() {
-          return this.tasks.filter((t) => t.done).slice().reverse();
-        }
-      },
-      methods: {
-        addTask() {
-          if (this.newTask.trim() === "") return;
-          const lines = this.newTask.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
-          lines.forEach(line => this.tasks.push({ text: line, done: false }));
-          this.newTask = "";
-          this.saveTasks();
-
-          // เล่นเสียงเพิ่มงาน
-          const audio = document.getElementById("add-sound");
-          if (audio) {
-            audio.currentTime = 0;
-            audio.play();
-          }
-        },
-        completeTask() {
-          const index = this.tasks.findIndex((t) => !t.done);
-          if (index !== -1) {
-            this.tasks[index].done = true;
-            const [doneTask] = this.tasks.splice(index, 1);
-            this.tasks.push(doneTask);
-            this.saveTasks();
-
-            const audio = document.getElementById("complete-sound");
-            if (audio) {
-              audio.currentTime = 0;
-              audio.play();
-            }
-          }
-        },
-        moveUpCompleted(index) {
-          const completed = this.completedTasks;
-          if (index > 0) {
-            const a = this.tasks.indexOf(completed[index]);
-            const b = this.tasks.indexOf(completed[index - 1]);
-            [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
-            this.saveTasks();
-
-            const audio = document.getElementById("move-sound");
-            if (audio) {
-              audio.currentTime = 0;
-              audio.play();
-            }
-          }
-        },
-        moveDownCompleted(index) {
-          const completed = this.completedTasks;
-          if (index < completed.length - 1) {
-            const a = this.tasks.indexOf(completed[index]);
-            const b = this.tasks.indexOf(completed[index + 1]);
-            [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
-            this.saveTasks();
-
-            const audio = document.getElementById("move-sound");
-            if (audio) {
-              audio.currentTime = 0;
-              audio.play();
-            }
-          }
-        },
-        moveUpPending(index) {
-          const pending = this.pendingTasks;
-          if (index > 0) {
-            const a = this.tasks.indexOf(pending[index]);
-            const b = this.tasks.indexOf(pending[index - 1]);
-            [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
-            this.saveTasks();
-
-            const audio = document.getElementById("move-sound");
-            if (audio) {
-              audio.currentTime = 0;
-              audio.play();
-            }
-          }
-        },
-        moveDownPending(index) {
-          const pending = this.pendingTasks;
-          if (index < pending.length - 1) {
-            const a = this.tasks.indexOf(pending[index]);
-            const b = this.tasks.indexOf(pending[index + 1]);
-            [this.tasks[a], this.tasks[b]] = [this.tasks[b], this.tasks[a]];
-            this.saveTasks();
-
-            const audio = document.getElementById("move-sound");
-            if (audio) {
-              audio.currentTime = 0;
-              audio.play();
-            }
-          }
-        },
-        deleteTask(task) {
-          const index = this.tasks.indexOf(task);
-          if (index !== -1) {
-            this.tasks.splice(index, 1);
-            this.saveTasks();
-
-            const audio = document.getElementById("delete-sound");
-            if (audio) {
-              audio.currentTime = 0;
-              audio.play();
-            }
-          }
-          if (this.editingTask === task) this.cancelEdit();
-        },
-        clearAllTasks() {
-          if (confirm("แน่ใจหรือไม่ว่าจะลบรายการทั้งหมด?")) {
-            this.tasks = [];
-            this.saveTasks();
-          }
-        },
-        saveTasks() {
-          localStorage.setItem("tasks", JSON.stringify(this.tasks));
-        },
-        loadTasks() {
-          const data = localStorage.getItem("tasks");
-          if (data) {
-            this.tasks = JSON.parse(data);
-          }
-        },
-        startEdit(task) {
-          this.editingTask = task;
-          this.editingText = task.text;
-          this.$nextTick(() => {
-            // autofocus input handled in template
-          });
-        },
-        saveEdit() {
-          if (this.editingTask && this.editingText.trim() !== "") {
-            this.editingTask.text = this.editingText.trim();
-            this.saveTasks();
-          }
-          this.editingTask = null;
-          this.editingText = "";
-        },
-        cancelEdit() {
-          this.editingTask = null;
-          this.editingText = "";
-        }
-      },
-      mounted() {
-        this.loadTasks();
-      }
-    }).mount("#app");
-  </script>
-
+  <footer>
+    © 2025 ห้องฟังใจ | พัฒนาโดยหัวใจที่อยากฟัง
+  </footer>
 </body>
 </html>

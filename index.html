@@ -74,6 +74,32 @@
       display: block;
       margin: 1rem auto;
     }
+
+    .qr {
+      max-width: 200px;
+      cursor: zoom-in;
+      transition: transform 0.3s ease;
+    }
+
+    .zoom-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .zoom-overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      border: 8px solid white;
+      border-radius: 8px;
+    }
   </style>
 </head>
 
@@ -101,16 +127,32 @@
     <div class="card">
       <h2>☕ สนับสนุนฉัน</h2>
       <p>ถ้าคุณรู้สึกว่าการฟังครั้งนี้มีคุณค่า และอยากสนับสนุนค่ากาแฟให้ฉัน :)</p>
-      <img
-        src="https://scontent.fhdy2-1.fna.fbcdn.net/v/t1.15752-9/494820456_1229248635533459_2185149320671282401_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=0024fc&_nc_ohc=GEuByw5ztK4Q7kNvwEPwCPT&_nc_oc=AdlspLQ4ocVknbzGakxxXpvhutFgT3ICu9XC6FaoqXCp0Xrl1LHFPbrZY_ktzENCxTsdxvR9mRdwT9p8dqTtPCdv&_nc_ad=z-m&_nc_cid=1277&_nc_zt=23&_nc_ht=scontent.fhdy2-1.fna&oh=03_Q7cD2gHYOl9oEE0o7b92FOc4qmHqu1cABtnLg6x8W5sWYp6apQ&oe=686D07E7"
-        alt="PromptPay QR Code" class="qr">
+      <img src="ห้องพักใจ.png" alt="PromptPay QR Code" class="qr" id="qrImage">
       <p><strong>ชื่อบัญชี:</strong> รุสลี ดอเลาะ</p>
+    </div>
+
+    <div class="zoom-overlay" id="zoomOverlay">
+      <img src="qr.png" alt="QR Code ขนาดใหญ่" id="zoomedImage">
     </div>
   </div>
 
   <footer>
     © 2025 ห้องฟังใจ | พัฒนาโดยหัวใจที่อยากฟัง
   </footer>
+
+  <script>
+    const qrImage = document.getElementById('qrImage');
+    const zoomOverlay = document.getElementById('zoomOverlay');
+    const zoomedImage = document.getElementById('zoomedImage');
+
+    qrImage.addEventListener('click', () => {
+      zoomOverlay.style.display = 'flex';
+    });
+
+    zoomOverlay.addEventListener('click', () => {
+      zoomOverlay.style.display = 'none';
+    });
+  </script>
 </body>
 
 </html>

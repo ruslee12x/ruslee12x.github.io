@@ -81,13 +81,16 @@
 
   <script src="script.js"></script>
 
-  <div class="theme-buttons">
+<div class="theme-toggle" onclick="toggleThemeMenu()">
+  🎨
+</div>
+<div class="theme-buttons hidden" id="themeButtons">
+  <div class="theme-button-circle theme-button-default" onclick="setTheme('default')" title="ธีมฟ้าเขียว"></div>
+  <div class="theme-button-circle theme-button-pink" onclick="setTheme('pink')" title="ธีมชมพู"></div>
+  <div class="theme-button-circle theme-button-dark" onclick="setTheme('dark')" title="ธีมดำ"></div>
+  <div class="theme-button-circle theme-button-white" onclick="setTheme('white')" title="ธีมขาว"></div>
+</div>
 
-    <div class="theme-button-circle theme-button-default" onclick="setTheme('default')" title="ธีมฟ้าเขียว"></div>
-    <div class="theme-button-circle theme-button-pink" onclick="setTheme('pink')" title="ธีมชมพู"></div>
-    <div class="theme-button-circle theme-button-dark" onclick="setTheme('dark')" title="ธีมดำ"></div>
-    <div class="theme-button-circle theme-button-white" onclick="setTheme('white')" title="ธีมขาว"></div>
-  </div>
 
 </body>
 

@@ -2,37 +2,109 @@
 <html lang="th">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ห้องฟังใจ</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #e8fdf5, #d6f0f8, #edf2fa);
+      --header-bg: radial-gradient(circle at center, #d0f0e8, #c6e8f5);
+      --border-color: #c0e0e6;
+      --text-main: #2d6b60;
+      --text-sub: #456;
+      --button-gradient: linear-gradient(to right, #5ed6a3, #36a9cc);
+      --button-hover: linear-gradient(to right, #38b79f, #2d8bb8);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --footer-bg: #eaf8f8;
+      --social-hover: #3cb0b0;
+      --quote-color: #3e8877;
+    }
+
+    body.theme-pink {
+      --bg-gradient: linear-gradient(180deg, #fff3f7 0%, #fef9f4 100%);
+      --header-bg: radial-gradient(circle at center, #ffdbe2, #ffcdd5);
+      --border-color: #f8c9d4;
+      --text-main: #994d66;
+      --text-sub: #555;
+      --button-gradient: linear-gradient(to right, #f59ca9, #f4869b);
+      --button-hover: linear-gradient(to right, #e98090, #e4697f);
+      --card-bg: #fffaf8;
+      --footer-bg: #fdf1f5;
+      --social-hover: #f59ca9;
+      --quote-color: #aa6070;
+    }
+
+    body.theme-white {
+      --bg-gradient: #ffffff;
+      --header-bg: #f4f4f4;
+      --border-color: #dddddd;
+      --text-main: #333;
+      --text-sub: #555;
+      --button-gradient: linear-gradient(to right, #bbbbbb, #888888);
+      --button-hover: linear-gradient(to right, #999999, #666666);
+      --card-bg: #ffffff;
+      --footer-bg: #f0f0f0;
+      --social-hover: #999999;
+      --quote-color: #777;
+    }
+
+    body.theme-dark {
+      --bg-gradient: linear-gradient(to right, #111, #222);
+      --header-bg: #1e1e1e;
+      --border-color: #333;
+      --text-main: #eee;
+      --text-sub: #bbb;
+      --button-gradient: linear-gradient(to right, #444, #666);
+      --button-hover: linear-gradient(to right, #555, #777);
+      --card-bg: #1b1b1b;
+      --footer-bg: #111;
+      --social-hover: #999;
+      --quote-color: #888;
+    }
+
     body {
       font-family: 'Kanit', sans-serif;
-      background: linear-gradient(180deg, #fff3f7 0%, #fef9f4 100%);
       margin: 0;
       padding: 0;
-      color: #333;
+      color: var(--text-main);
+      background: var(--bg-gradient);
+      background-size: 600% 600%;
+      animation: gradientBG 25s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
     header {
-      background: radial-gradient(circle at center, #ffdbe2, #ffcdd5);
+      background: var(--header-bg);
       padding: 3rem 1rem;
       text-align: center;
-      border-bottom: 4px solid #f8c9d4;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border-bottom: 4px solid var(--border-color);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
     header h1 {
       margin: 0;
       font-size: 3rem;
-      color: #994d66;
+      color: var(--text-main);
     }
 
     header p {
       font-size: 1.3rem;
-      color: #555;
+      color: var(--text-sub);
     }
 
     .section {
@@ -42,12 +114,13 @@
     }
 
     .card {
-      background: #fffaf8;
+      background: var(--card-bg);
       padding: 2rem;
       border-radius: 20px;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
       margin-bottom: 2.5rem;
       transition: transform 0.2s, box-shadow 0.3s;
+      backdrop-filter: blur(6px);
     }
 
     .card:hover {
@@ -56,13 +129,13 @@
     }
 
     .card h2 {
-      color: #b76e79;
+      color: var(--text-main);
       margin-bottom: 1.2rem;
       font-size: 1.8rem;
     }
 
     .button {
-      background-color: #f59ca9;
+      background: var(--button-gradient);
       color: white;
       padding: 0.8rem 1.8rem;
       border: none;
@@ -76,8 +149,8 @@
     }
 
     .button:hover {
-      background-color: #e98090;
       transform: scale(1.05);
+      background: var(--button-hover);
     }
 
     .social-icons {
@@ -90,12 +163,12 @@
     }
 
     .social-icons a {
-      color: #888;
+      color: #555;
       transition: color 0.3s, transform 0.2s;
     }
 
     .social-icons a:hover {
-      color: #f59ca9;
+      color: var(--social-hover);
       transform: scale(1.2);
     }
 
@@ -104,7 +177,7 @@
       display: block;
       margin: 1rem auto;
       border-radius: 12px;
-      border: 2px solid #f8d9e0;
+      border: 2px solid var(--border-color);
       transition: transform 0.3s;
     }
 
@@ -135,9 +208,9 @@
     footer {
       text-align: center;
       padding: 2rem 1rem;
-      background-color: #fdf1f5;
+      background-color: var(--footer-bg);
       font-size: 0.95rem;
-      color: #888;
+      color: #666;
       margin-top: 3rem;
     }
 
@@ -147,15 +220,55 @@
 
     .quote {
       font-style: italic;
-      color: #aa6070;
+      color: var(--quote-color);
       text-align: center;
       margin-top: 1rem;
       font-size: 1.1rem;
     }
+
+    .theme-buttons {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .theme-button-circle {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-button-circle:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-button-default {
+      background: linear-gradient(to right, #5ed6a3, #36a9cc);
+    }
+
+    .theme-button-pink {
+      background: linear-gradient(to right, #f59ca9, #f4869b);
+    }
+
+    .theme-button-white {
+      background: linear-gradient(to right, #bbbbbb, #888888);
+    }
+
+    .theme-button-dark {
+      background: linear-gradient(to right, #444, #222);
+    }
   </style>
 </head>
 
-<body>
+<body class="theme-white">
   <header>
     <h1>ห้องฟังใจ</h1>
     <p>พื้นที่ที่รวมทั้งการพัฒนาเทคโนโลยี และการฟังหัวใจของผู้คน</p>
@@ -165,7 +278,8 @@
     <div class="card">
       <h2>👋 สวัสดีครับ ผมชื่อรุสลี</h2>
       <p>ผมเป็นนักพัฒนาซอฟต์แวร์ และผู้ที่รักการฟังผู้คนด้วยความเข้าใจ</p>
-      <p>ในฐานะ INFJ ผู้ใส่ใจความรู้สึก มีวิสัยทัศน์ และเชื่อมโยงความหมาย ผมสร้าง “ห้องฟังใจ” เพื่อให้คุณรู้ว่าคุณไม่ได้อยู่คนเดียว</p>
+      <p>ในฐานะ INFJ ผู้ใส่ใจความรู้สึก มีวิสัยทัศน์ และเชื่อมโยงความหมาย ผมสร้าง “ห้องฟังใจ”
+        เพื่อให้คุณรู้ว่าคุณไม่ได้อยู่คนเดียว</p>
       <p class="quote">“เทคโนโลยีที่ดีที่สุด คือสิ่งที่ทำให้เรารู้สึกเป็นมนุษย์มากขึ้น”</p>
     </div>
 
@@ -188,17 +302,16 @@
       <div style="text-align: center;">
         <a href="https://www.instagram.com/rusleedoloh_" target="_blank" title="Instagram">
           <i class="fab fa-instagram" style="font-size: 2.5rem; color: #e1306c;"></i>
-        </a>
-        <br>
+        </a><br />
         <a href="https://www.instagram.com/rusleedoloh_" target="_blank" class="button">แชทบน IG</a>
       </div>
       <p style="margin-top: 2rem; text-align: center;">ช่องทางอื่น ๆ:</p>
       <div class="social-icons">
-        <a href="#" target="_blank" title="LINE"><i class="fab fa-line"></i></a>
-        <a href="#" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="#" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>
-        <a href="#" target="_blank" title="Threads"><i class="fab fa-threads"></i></a>
-        <a href="#" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="#" title="LINE"><i class="fab fa-line"></i></a>
+        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="#" title="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="#" title="Threads"><i class="fab fa-threads"></i></a>
+        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
       </div>
     </div>
 
@@ -236,9 +349,24 @@
     zoomOverlay.addEventListener('click', () => {
       zoomOverlay.style.display = 'none';
     });
+
+    function setTheme(theme) {
+      document.body.className = '';
+      if (theme === 'pink') document.body.classList.add('theme-pink');
+      else if (theme === 'white') document.body.classList.add('theme-white');
+      else if (theme === 'dark') document.body.classList.add('theme-dark');
+      else document.body.classList.add('theme-default');
+    }
   </script>
+
+  <div class="theme-buttons">
+
+    <div class="theme-button-circle theme-button-default" onclick="setTheme('default')" title="ธีมฟ้าเขียว"></div>
+    <div class="theme-button-circle theme-button-pink" onclick="setTheme('pink')" title="ธีมชมพู"></div>
+    <div class="theme-button-circle theme-button-dark" onclick="setTheme('dark')" title="ธีมดำ"></div>
+    <div class="theme-button-circle theme-button-white" onclick="setTheme('white')" title="ธีมขาว"></div>
+  </div>
+
 </body>
 
 </html>
-
-
